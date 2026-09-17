@@ -2031,6 +2031,65 @@ def get_vendor_subscription(db: Session = Depends(get_db), current_user: models.
         last_failure_reason=last_failure_reason,
     )
 
+@app.post(
+    "/vendors/{vendor_id}/reports",
+    response_model=schemas.VendorReportResponse
+)
+def report_vendor(
+    vendor_id: int,
+    body: schemas.VendorReportCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not current_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication required"
+        )
+
+    vendor = (
+        db.query(models.Vendor)
+        .filter(models.Vendor.id == vendor_id)
+        .first()
+    )
+
+    if not vendor:
+        raise HTTPException(
+            status_code=404,
+            detail="Vendor not found"
+        )
+    # Prevent vendors from reporting their own profile.
+    if current_user.vendor_id == vendor_id:
+        raise HTTPException(
+            status_code=400,
+            detail="You cannot report your own vendor profile."
+        )
+    allowed_reasons = {
+        "scam_or_fraud"
+        "misleading_listing"
+        "harassment"
+        "payment_issue"
+        "other"
+    }
+    if body.reason not in allowed_reasons:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid report reason"
+        )
+    report = models.VendorReport(
+        reporter_id=current_user.id,
+        vendor_id=vendor_id,
+        reason=body.reason,
+        description=body.description.strip()
+        if body.description
+        else None,
+        status="pending",
+    )
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+
+    return report
 @app.post("/vendor/subscription/checkout", response_model=schemas.PaymentInitiateResponse)
 @limiter.limit("10/minute")
 def initiate_vendor_subscription(

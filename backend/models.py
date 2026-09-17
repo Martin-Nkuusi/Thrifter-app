@@ -32,7 +32,7 @@ class StyleCategory(Base):
     slug = Column(String, unique=True, index=True)
     name = Column(String)
     description = Column(Text, nullable=True)
-    
+
     # Foreign keys to visual clusters
     top_cluster_id = Column(Integer, ForeignKey("visual_clusters.id"), nullable=True)
     bottom_cluster_id = Column(Integer, ForeignKey("visual_clusters.id"), nullable=True)
@@ -64,6 +64,38 @@ class Vendor(Base):
     email_verified_at = Column(DateTime, nullable=True)
     phone_verified_at = Column(DateTime, nullable=True)
     items = relationship("Item", back_populates="vendor")
+
+class VendorReport(Base):
+    __tablename__ = "vendor_reports"
+    id = Column(Integer, primary_key=True, index=True)
+    reporter_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False,
+        index=True
+    )
+    vendor_id = Column(
+        Integer,
+        ForeignKey("vendors.id"),
+        nullable=False,
+        index=True
+    )
+    reason = Column(String(50), nullable=False)
+    description = Column(Text, nullable=True)
+    status = Column(
+        String(20),
+        default="pending",
+        nullable=False,
+        index=True
+    )
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+    reporter = relationship("User")
+    vendor = relationship("Vendor")
+
 
 class ShortLink(Base):
     __tablename__ = "short_links"

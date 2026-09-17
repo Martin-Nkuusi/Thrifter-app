@@ -304,6 +304,32 @@ class VendorProfile(BaseModel):
     class Config:
         from_attributes = True
 
+class VendorReportCreate(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=50)
+    description: Optional[str] = Field(None, max_length=1000)
+
+class VendorReportResponse(BaseModel):
+    id: int
+    vendor_id: int
+    reason: str
+    description: Optional[str] = None
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AdminVendorReportResponse(BaseModel):
+    id: int
+    vendor_id: int
+    vendor_name: str
+    reporter_id: int
+    reporter_email: Optional[str] = None
+    reason: str
+    description: Optional[str] = None
+    status: str
+    created_at: datetime
+
 class DemandEntryCreate(BaseModel):
     item_name: str = Field(..., min_length=2, max_length=100)
     price: str = Field(..., min_length=1, max_length=100)
