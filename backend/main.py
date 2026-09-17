@@ -2065,11 +2065,11 @@ def report_vendor(
             detail="You cannot report your own vendor profile."
         )
     allowed_reasons = {
-        "scam_or_fraud"
-        "misleading_listing"
-        "harassment"
-        "payment_issue"
-        "other"
+        "scam_or_fraud",
+        "misleading_listing",
+        "harassment",
+        "payment_issue",
+        "other",
     }
     if body.reason not in allowed_reasons:
         raise HTTPException(
